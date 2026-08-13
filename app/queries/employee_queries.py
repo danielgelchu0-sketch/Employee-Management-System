@@ -1,5 +1,5 @@
 from sqlalchemy.orm import joinedload
-
+from sqlalchemy import text
 from app.database.database import SessionLocal
 from app.database.models import Employee
 from app.database.models import Employee, Department
