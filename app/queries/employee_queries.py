@@ -147,3 +147,49 @@ def get_employees_filtered_raw(department_name=None, min_salary=None, max_salary
     session.close()
 
     return employees
+
+def get_department_salary_summary():
+    session = SessionLocal()
+
+    from sqlalchemy import func
+
+    results = (
+        session.query(
+            Department.name,
+            func.count(Employee.id).label("employee_count"),
+            func.avg(Employee.salary).label("average_salary"),
+            func.sum(Employee.salary).label("total_salary"),
+        )
+        .join(Employee, Employee.department_id == Department.id)
+        .group_by(Department.name)
+        .order_by(Department.name)
+        .all()
+    )
+
+    session.close()
+
+    return results
+
+
+def get_department_salary_summary_raw():
+    session = SessionLocal()
+
+    sql = text("""
+        SELECT
+            d.name AS department_name,
+            COUNT(e.id) AS employee_count,
+            AVG(e.salary) AS average_salary,
+            SUM(e.salary) AS total_salary
+        FROM departments AS d
+        JOIN employees AS e
+            ON e.department_id = d.id
+        GROUP BY d.name
+        ORDER BY d.name
+    """)
+
+    result = session.execute(sql)
+    summary = result.mappings().all()
+
+    session.close()
+
+    return summary
