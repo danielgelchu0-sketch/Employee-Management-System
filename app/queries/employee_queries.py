@@ -1,7 +1,7 @@
-from sqlalchemy.orm import joinedload
 from sqlalchemy import text
+from sqlalchemy.orm import joinedload, contains_eager
+
 from app.database.database import SessionLocal
-from app.database.models import Employee
 from app.database.models import Employee, Department
 
 
@@ -28,6 +28,7 @@ def get_employee_by_id(employee_id):
 
     return employee
 
+
 def get_employees_with_departments():
     session = SessionLocal()
 
@@ -41,12 +42,44 @@ def get_employees_with_departments():
 
     return employees
 
+
+def get_employees_with_departments_raw():
+    session = SessionLocal()
+
+    sql = text("""
+        SELECT
+            e.id,
+            e.first_name,
+            e.last_name,
+            e.email,
+            d.name AS department_name
+        FROM employees AS e
+        JOIN departments AS d
+            ON d.id = e.department_id
+        ORDER BY e.id
+    """)
+
+    result = session.execute(sql)
+
+    employees = result.mappings().all()
+
+    session.close()
+
+    return employees
+
+
 def get_employees_filtered(department_name=None, min_salary=None, max_salary=None, sort_by="last_name"):
     session = SessionLocal()
-query = session.query(Employee).join(Employee.department)
+
+    query = (
+        session.query(Employee)
+        .join(Employee.department)
+        .options(contains_eager(Employee.department))
+    )
 
     if department_name:
         query = query.filter(Department.name == department_name)
+
     if min_salary is not None:
         query = query.filter(Employee.salary >= min_salary)
 
