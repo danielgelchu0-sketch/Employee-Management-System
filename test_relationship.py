@@ -1,14 +1,25 @@
 from app.database.database import SessionLocal
-from app.database.models import Employee
+from app.database.models import Department
 
 
 session = SessionLocal()
 
-employee = session.query(Employee).filter(Employee.id == 3).first()
+department = (
+    session.query(Department)
+    .filter(Department.id == 1)
+    .first()
+)
 
-if employee:
-    print("Employee:", employee.first_name, employee.last_name)
-    print("Department:", employee.department.name)
-    print("Location:", employee.department.location)
+if department:
+    print("Department:", department.name)
+
+    print("Employees:")
+
+    for employee in department.employees:
+        print(
+            employee.id,
+            employee.first_name,
+            employee.last_name
+        )
 
 session.close()
