@@ -2,6 +2,7 @@ from sqlalchemy.orm import joinedload
 
 from app.database.database import SessionLocal
 from app.database.models import Employee
+from app.database.models import Employee, Department
 
 
 def get_all_employees():
