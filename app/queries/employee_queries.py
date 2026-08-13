@@ -10,3 +10,17 @@ def get_all_employees():
     session.close()
 
     return employees
+
+
+def get_employee_by_id(employee_id):
+    session = SessionLocal()
+
+    employee = (
+        session.query(Employee)
+        .filter(Employee.id == employee_id)
+        .first()
+    )
+
+    session.close()
+
+    return employee

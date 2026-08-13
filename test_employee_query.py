@@ -1,12 +1,12 @@
-from app.queries.employee_queries import get_all_employees
+from app.queries.employee_queries import get_employee_by_id
 
 
-employees = get_all_employees()
+employee = get_employee_by_id(3)
 
-for employee in employees:
-    print(
-        employee.id,
-        employee.first_name,
-        employee.last_name,
-        employee.email
-    )
+if employee:
+    print("Employee found:")
+    print("ID:", employee.id)
+    print("Name:", employee.first_name, employee.last_name)
+    print("Email:", employee.email)
+else:
+    print("Employee not found.")
