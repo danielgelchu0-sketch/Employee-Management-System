@@ -24,6 +24,9 @@ class Department(Base):
     name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     location: Mapped[str] = mapped_column(String(100), nullable=False)
 
+    employees: Mapped[list["Employee"]] = relationship(
+        back_populates="department"
+    )
 
 class Position(Base):
     __tablename__ = "positions"
