@@ -35,7 +35,6 @@ class Position(Base):
     title: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     level: Mapped[str] = mapped_column(String(50), nullable=False)
 
-
 class Employee(Base):
     __tablename__ = "employees"
 
@@ -55,6 +54,10 @@ class Employee(Base):
     position_id: Mapped[int] = mapped_column(
         ForeignKey("positions.id"),
         nullable=False
+    )
+
+    department: Mapped["Department"] = relationship(
+        back_populates="employees"
     )
 
 
