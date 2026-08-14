@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Employee Management System</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 2rem; background: #f4f4f4; }
+  h1 { color: #222; }
+  section { background: white; padding: 1rem 1.5rem; margin-bottom: 1.5rem; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+  table { border-collapse: collapse; width: 100%; margin-top: 0.5rem; }
+  th, td { border: 1px solid #ddd; padding: 6px 10px; text-align: left; font-size: 14px; }
+  th { background: #333; color: white; }
+  tr:nth-child(even) { background: #fafafa; }
+  button { padding: 6px 14px; margin-right: 0.5rem; cursor: pointer; }
+  input, select { padding: 4px 6px; margin-right: 0.5rem; }
+  .controls { margin-bottom: 0.75rem; }
+</style>
+</head>
+<body>
+
+<h1>Employee Management System</h1>
+
+<section>
+  <h2>All Employees</h2>
+  <button onclick="loadAllEmployees()">Load Employees</button>
+  <table id="employees-table"><thead></thead><tbody></tbody></table>
+</section>
+
+<section>
+  <h2>Employees with Departments (ORM vs Raw SQL)</h2>
+  <div class="controls">
+    <button onclick="loadWithDepartments(false)">Load (ORM)</button>
+    <button onclick="loadWithDepartments(true)">Load (Raw SQL)</button>
+  </div>
+  <table id="departments-table"><thead></thead><tbody></tbody></table>
+</section>
+
+<section>
+  <h2>Filter Employees</h2>
+  <div class="controls">
+    <input id="filter-department" placeholder="Department (e.g. Finance)">
+    <input id="filter-min-salary" placeholder="Min salary" type="number">
+    <select id="filter-sort">
+      <option value="last_name">Sort: Last name</option>
+      <option value="salary">Sort: Salary</option>
+      <option value="hire_date">Sort: Hire date</option>
+    </select>
+    <button onclick="loadFiltered(false)">Filter (ORM)</button>
+    <button onclick="loadFiltered(true)">Filter (Raw SQL)</button>
+  </div>
+  <table id="filtered-table"><thead></thead><tbody></tbody></table>
+</section>
+
+<section>
+  <h2>Department Salary Summary</h2>
+  <div class="controls">
+    <button onclick="loadSummary(false)">Load (ORM)</button>
+    <button onclick="loadSummary(true)">Load (Raw SQL)</button>
+  </div>
+  <table id="summary-table"><thead></thead><tbody></tbody></table>
+</section>
+
+<script>
+function renderTable(tableId, rows) {
+  const table = document.getElementById(tableId);
+  const thead = table.querySelector("thead");
+  const tbody = table.querySelector("tbody");
+  thead.innerHTML = "";
+  tbody.innerHTML = "";
+
+  if (!rows || rows.length === 0) {
+    tbody.innerHTML = "<tr><td>No results</td></tr>";
+    return;
+  }
+
+  const columns = Object.keys(rows[0]);
+  const headRow = document.createElement("tr");
+  columns.forEach(col => {
+    const th = document.createElement("th");
+    th.textContent = col;
+    headRow.appendChild(th);
+  });
+  thead.appendChild(headRow);
+
+  rows.forEach(row => {
+    const tr = document.createElement("tr");
+    columns.forEach(col => {
+      const td = document.createElement("td");
+      td.textContent = row[col];
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+async function loadAllEmployees() {
+  const res = await fetch("/api/employees");
+  const data = await res.json();
+  renderTable("employees-table", data);
+}
+
+async function loadWithDepartments(raw) {
+  const url = raw ? "/api/employees/with-departments/raw" : "/api/employees/with-departments";
+  const res = await fetch(url);
+  const data = await res.json();
+  renderTable("departments-table", data);
+}
+
+async function loadFiltered(raw) {
+  const department = document.getElementById("filter-department").value;
+  const minSalary = document.getElementById("filter-min-salary").value;
+  const sortBy = document.getElementById("filter-sort").value;
+
+  const params = new URLSearchParams();
+  if (department) params.append("department", department);
+  if (minSalary) params.append("min_salary", minSalary);
+  params.append("sort_by", sortBy);
+
+  const url = (raw ? "/api/employees/filtered/raw" : "/api/employees/filtered") + "?" + params.toString();
+  const res = await fetch(url);
+  const data = await res.json();
+  renderTable("filtered-table", data);
+}
+
+async function loadSummary(raw) {
+  const url = raw ? "/api/departments/summary/raw" : "/api/departments/summary";
+  const res = await fetch(url);
+  const data = await res.json();
+  renderTable("summary-table", data);
+}
+</script>
+
+</body>
+</html>
